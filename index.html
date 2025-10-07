@@ -45,7 +45,12 @@
       .org-level { flex-direction: column; align-items: center; }
       #functional-level { grid-template-columns: 1fr; }
     }
-  </style>
+  
+#pdf-content {
+  transform: scale(0.95);
+  transform-origin: top center;
+}
+</style>
 </head>
 <body>
 
@@ -241,11 +246,11 @@
         btn.addEventListener("click", () => {
           const element = document.getElementById("pdf-content");
           const opt = {
-            margin: 0.3,
+            margin: 0.2,
             filename: 'organigramma-zenith-2025.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 3, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
           };
           html2pdf().set(opt).from(element).save();
         });
