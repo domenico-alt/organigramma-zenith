@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organigramma Aziendale Zenith 2025</title>
+  <meta name="robots" content="noindex, nofollow">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F8F9FA;
+    }
+    .org-node {
+      background-color: white;
+      border: 2px solid #00A6A6;
+      border-radius: 8px;
+      padding: 12px 20px;
+      margin: 10px;
+      text-align: center;
+      min-width: 150px;
+      height: 78px;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+    }
+    .org-node .name { font-weight: 700; color: #00A6A6; }
+    .org-node .role { font-size: 0.8rem; color: #5A3E36; }
+    .task-freq-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+    .freq-select {
+      appearance: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      outline: none;
+      font-weight: 600;
+    }
+    @media (max-width: 640px) {
+      .org-level { flex-direction: column; align-items: center; }
+      #functional-level { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======= PASSWORD GATE ======= -->
+  <div id="gate" class="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md">
+      <h2 class="text-2xl font-bold text-center mb-4" style="color:#00A6A6">Accesso</h2>
+      <p class="text-gray-600 text-center mb-6">Inserisci la password per visualizzare l'organigramma.</p>
+      <input id="pw" type="password" class="w-full border rounded-lg p-3 mb-4" placeholder="Password" />
+      <button id="enter" class="w-full bg-[#00A6A6] text-white rounded-lg p-3 hover:bg-[#008C8C]">Entra</button>
+      <p id="err" class="text-red-600 text-sm mt-3 hidden">Password errata. Riprova.</p>
+      <p class="text-xs text-gray-400 mt-4 text-center">Protezione lato client. Non usare per dati sensibili.</p>
+    </div>
+  </div>
+
+  <!-- Pagina Accesso Negato -->
+  <div id="denied" class="min-h-screen hidden items-center justify-center bg-gray-100 p-6">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md text-center">
+      <h2 class="text-2xl font-bold mb-4 text-red-600">Accesso negato</h2>
+      <p class="text-gray-600 mb-6">La password inserita non è corretta.</p>
+      <button id="backToGate" class="bg-gray-800 text-white rounded-lg px-4 py-2">Torna indietro</button>
+    </div>
+  </div>
+
+  <!-- ======= CONTENUTO PROTETTO ======= -->
+  <div id="protected-content" style="display:none">
+
+  <header class="bg-white shadow-md">
+    <div class="container mx-auto px-6 py-4">
+      <h1 class="text-3xl font-bold text-center" style="color: #00A6A6;">Organigramma Aziendale</h1>
+      <p class="text-center text-gray-600 mt-2">Modifica le frequenze in tempo reale, poi esporta in PDF.</p>
+    </div>
+  </header>
+
+  <main id="pdf-content" class="container mx-auto px-6 py-8">
+    <section id="struttura" class="mb-12 flex justify-center">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-5xl relative">
+        <div class="flex justify-center relative mb-12">
+          <div class="org-node mx-4">
+            <p class="name">Domenico Mirabile</p>
+            <p class="role">Rappresentante Legale & Resp. Tecnico</p>
+          </div>
+          <div class="org-node mx-4">
+            <p class="name">Till Gossmann</p>
+            <p class="role">Socio & Resp. Cantieri</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+          <div class="org-node">
+            <p class="name">Amministrazione e Finanza</p>
+            <p class="role">Alessandra Gremigni, Milady Landi</p>
+          </div>
+          <div class="org-node">
+            <p class="name">Ufficio Tecnico e Pratiche</p>
+            <p class="role">Willy Mbonji, Sauro Morganti</p>
+          </div>
+          <div class="org-node">
+            <p class="name">Logistica e Acquisti</p>
+            <p class="role">Andrea Borselli</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dettaglio-ruoli">
+      <h2 class="text-2xl font-bold text-center mb-8" style="color: #5A3E36;">Dettaglio Ruoli e Responsabilità</h2>
+      <div id="employee-cards-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+    </section>
+
+    <div class="flex justify-center mt-12">
+      <button id="btn-stampa" class="bg-[#00A6A6] text-white px-6 py-3 rounded-lg shadow-md hover:bg-[#008C8C] transition">
+        📄 Esporta in PDF
+      </button>
+    </div>
+  </main>
+
+  <footer class="text-center py-6 mt-8 bg-gray-100">
+    <p class="text-gray-600">© 2025 Zenith Solar – Organigramma aggiornato</p>
+  </footer>
+
+  </div> <!-- /#protected-content -->
+
+  <script>
+    // ===== Frequenze & Dati Employee (come nel tuo file) =====
+    const ALL_FREQUENCIES = [
+      { key: "giornaliero", label: "Giornaliero", color: "#E8C547", textColor: "#5A3E36" },
+      { key: "mensile", label: "Mensile", color: "#F44708", textColor: "white" },
+      { key: "trimestrale", label: "Trimestrale", color: "#F44708", textColor: "white" },
+      { key: "semestrale", label: "Semestrale", color: "#F44708", textColor: "white" },
+      { key: "annuale", label: "Annuale", color: "#00A6A6", textColor: "white" },
+      { key: "occasionalmente", label: "Occasionale", color: "#75B5B5", textColor: "white" },
+      { key: "continuo", label: "Continuo", color: "#E8C547", textColor: "#5A3E36" },
+      { key: "altro", label: "Altro", color: "#5A3E36", textColor: "white" }
+    ];
+    const freqMap = Object.fromEntries(ALL_FREQUENCIES.map(f => [f.key, f]));
+
+    const employeeData = [
+      { name: "Michael Melis", title: "Socio non Operativo", tasks: [
+        { name: "Supporto strategico e consultivo", freq: "occasionalmente" },
+        { name: "Partecipazione assemblee soci", freq: "annuale" },
+        { name: "Revisione strategica (periodica)", freq: "trimestrale" }
+      ]},
+      { name: "Domenico Mirabile", title: "Rapp. Legale, Resp. Tecnico & Sicurezza", tasks: [
+        { name: "Project report simulazioni", freq: "giornaliero" },
+        { name: "Offerte FV", freq: "giornaliero" },
+        { name: "Verifica prodotti, certificazioni", freq: "occasionalmente" }
+      ]},
+      { name: "Till Gossmann", title: "Resp. Cantieri e Tecnici", tasks: [
+        { name: "Gestione personale", freq: "giornaliero" },
+        { name: "Sopralluoghi tecnici", freq: "occasionalmente" }
+      ]},
+      { name: "Alessandra Gremigni", title: "Amministrazione", tasks: [
+        { name: "Fatturazione lavori", freq: "giornaliero" },
+        { name: "Gestione banche", freq: "giornaliero" },
+        { name: "Buste paghe", freq: "mensile" }
+      ]},
+      { name: "Milady Landi", title: "Contabilità e Finanza", tasks: [
+        { name: "Contabilità generale", freq: "giornaliero" },
+        { name: "Pratiche finanziamenti", freq: "occasionalmente" }
+      ]},
+      { name: "Willy Mbonji", title: "Ufficio Tecnico", tasks: [
+        { name: "Pratiche Enel", freq: "giornaliero" },
+        { name: "Pratiche GSE", freq: "giornaliero" }
+      ]},
+      { name: "Sauro Morganti", title: "Ufficio Tecnico - Reporting", tasks: [
+        { name: "Pratiche Enea", freq: "continuo" },
+        { name: "Gestione rifiuti", freq: "trimestrale" }
+      ]},
+      { name: "Andrea Borselli", title: "Logistica e Acquisti", tasks: [
+        { name: "Ordine materiale", freq: "giornaliero" },
+        { name: "Gestione social", freq: "mensile" }
+      ]},
+      { name: "Funzioni da Assegnare", title: "Monitoraggio e Supporto Clienti", tasks: [
+        { name: "Monitoraggio impianti", freq: "altro" },
+        { name: "Aggiornamento sito web", freq: "altro" }
+      ]}
+    ];
+
+    function createFrequencySelect(taskKey, empName) {
+      return `
+        <select class="freq-select" onchange="updateFrequency(this, '${empName}', '${taskKey}')">
+          ${ALL_FREQUENCIES.map(f => `<option value="${f.key}">${f.label}</option>`).join('')}
+        </select>
+      `;
+    }
+
+    function renderEmployeeCards() {
+      const container = document.getElementById('employee-cards-container');
+      container.innerHTML = '';
+      employeeData.forEach(emp => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-lg shadow-lg p-6 flex flex-col items-center';
+        card.innerHTML = `
+          <h3 class="text-xl font-bold text-[#00A6A6]">${emp.name}</h3>
+          <p class="text-gray-500 mb-4">${emp.title}</p>
+          <ul class="w-full">
+            ${emp.tasks.map(t => {
+              const saved = localStorage.getItem(`${emp.name}_${t.name}`) || t.freq;
+              const freq = freqMap[saved];
+              return `
+                <li class="flex items-center justify-between py-2 border-b border-gray-200">
+                  <span class="text-gray-700 text-sm w-3/4">${t.name}</span>
+                  <span class="task-freq-badge w-1/4 text-right" style="background:${freq.color};color:${freq.textColor}">
+                    ${createFrequencySelect(t.name, emp.name)}
+                  </span>
+                </li>
+              `;
+            }).join('')}
+          </ul>
+        `;
+        container.appendChild(card);
+        card.querySelectorAll('select').forEach(sel => {
+          const taskName = sel.getAttribute('onchange').split("'")[3];
+          const saved = localStorage.getItem(`${emp.name}_${taskName}`);
+          if (saved) sel.value = saved;
+        });
+      });
+    }
+
+    function updateFrequency(select, empName, taskName) {
+      const newKey = select.value;
+      localStorage.setItem(`${empName}_${taskName}`, newKey);
+      const freq = freqMap[newKey];
+      select.parentElement.style.background = freq.color;
+      select.parentElement.style.color = freq.textColor;
+    }
+
+    // ===== Esportazione PDF =====
+    document.addEventListener('DOMContentLoaded', renderEmployeeCards);
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById("btn-stampa");
+      if (btn) {
+        btn.addEventListener("click", () => {
+          const element = document.getElementById("pdf-content");
+          const opt = {
+            margin: 0.3,
+            filename: 'organigramma-zenith-2025.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+          };
+          html2pdf().set(opt).from(element).save();
+        });
+      }
+    });
+
+    // ===== Password Gate (lato client) =====
+    const HASH_ATTESA = "90e21ed7a328a3a442f795c67a5cb4fabf62eab2b03c24f6a49b1a111835d75e";
+    const gate = document.getElementById('gate');
+    const denied = document.getElementById('denied');
+    const protectedEl = document.getElementById('protected-content');
+    const err = document.getElementById('err');
+    const backToGate = document.getElementById('backToGate');
+
+    async function sha256Hex(text){
+      const data = new TextEncoder().encode(text);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function unlock(pw){
+      const h = await sha256Hex(pw);
+      if(h === HASH_ATTESA){
+        sessionStorage.setItem('zenith_org_ok','1');
+        gate.style.display = 'none';
+        denied.classList.add('hidden');
+        protectedEl.style.display = 'block';
+      }else{
+        // mostra pagina Accesso negato
+        gate.style.display = 'none';
+        protectedEl.style.display = 'none';
+        denied.classList.remove('hidden');
+        denied.classList.add('flex');
+      }
+    }
+
+    document.getElementById('enter').addEventListener('click', ()=>unlock(document.getElementById('pw').value));
+    document.getElementById('pw').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ unlock(e.target.value); }});
+    backToGate.addEventListener('click', ()=>{
+      denied.classList.add('hidden');
+      denied.classList.remove('flex');
+      gate.style.display = 'block';
+      document.getElementById('pw').focus();
+    });
+
+    // Sblocco automatico se già validato nella sessione
+    if(sessionStorage.getItem('zenith_org_ok')==='1'){
+      gate.style.display = 'none';
+      denied.classList.add('hidden');
+      protectedEl.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
